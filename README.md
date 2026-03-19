@@ -1,29 +1,75 @@
-# 📦 AWS ACM Self-Signed Certificate Terraform Module
+# 📦 terraform-aws-acm-self-signed
 
-This Terraform module simplifies generating a self-signed TLS certificate and seamlessly importing it into AWS Certificate Manager (ACM). It is specifically tailored for development, testing, staging, or internal web applications where purchasing a publicly trusted wildcard or SAN TLS certificate isn't strictly necessary.
+Terraform module to generate a self-signed TLS certificate and import it into AWS Certificate Manager (ACM).
 
-## Example Usage
+This module simplifies the creation of a private key, a self-signed certificate, and its subsequent import into ACM. It is ideal for internal services, development environments, or any scenario where a publicly trusted certificate is not required.
+
+## ⚙️ What This Module Does
+
+- Generates a 2048-bit RSA private key.
+- Creates a self-signed TLS certificate with customizable Common Name and Organization.
+- Imports the certificate and private key into AWS ACM.
+- Supports configurable validity periods.
+- Allows tagging of the created ACM certificate.
+
+## ⚠️ Important Notes
+
+- **Not for Public Production:** Self-signed certificates are not trusted by browsers by default. They are intended for internal use, development, or testing.
+- **Security:** The private key is stored in the Terraform state. Ensure your state file is stored securely (e.g., encrypted S3 bucket).
+- **Manual Trust:** To avoid browser warnings, you may need to manually add this certificate to your system's or browser's trusted root store.
+
+## 📑 Prerequisites
+
+Before using this module, ensure you have:
+
+- AWS credentials configured for Terraform.
+- Terraform >= 1.3.0 installed.
+- Appropriate permissions to create ACM certificates and use the TLS provider.
+
+## 🚀 Quick Start
 
 ```hcl
-module "acm_self_signed_cert" {
-  source = "./modulos/terraform-aws-acm-self-signed" # update source to match your environment 
+module "acm_self_signed" {
+  source = "sergeimatos/acm-self-signed/aws"
 
-  # Required
-  common_name = "internal.app.local"
-
-  # Optional but recommended
-  organization          = "My Org Internal"
-  validity_period_hours = 8760 # 1 year
-
-  name_prefix = "dev"
-  environment = "development"
+  common_name = "api.internal.example.com"
+  organization = "My Company"
   
-  common_tags = {
-    Project   = "InternalApp"
-    ManagedBy = "Terraform"
-  }
+  environment = "dev"
+  name_prefix = "myapp"
 }
 ```
+
+Run the following commands to deploy:
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+## 🔐 Security Guidance
+
+- **Sensitive Outputs:** This module exports the private key and certificate PEM as sensitive outputs. Handle them with care.
+- **State Protection:** Use remote state with encryption and restricted access to prevent unauthorized exposure of the private key.
+- **Restricted Use:** Limit the use of self-signed certificates to environments where end-user trust is managed or not required.
+
+## 📁 Typical Use Case
+
+```text
+User/Service (Internal)
+    |
+    v
+Application Load Balancer (ALB) <-- [ This Module: ACM Certificate ]
+    |
+    v
+Private EC2 / Containers
+```
+
+## 🧩 Example
+
+- [Simple example](examples/simple)
+- The `examples/simple` directory demonstrates basic usage with a local provider setup.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -38,8 +84,8 @@ module "acm_self_signed_cert" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0 |
-| <a name="provider_tls"></a> [tls](#provider\_tls) | >= 4.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.37.0 |
+| <a name="provider_tls"></a> [tls](#provider\_tls) | 4.2.1 |
 
 ## Modules
 
