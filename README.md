@@ -1,4 +1,30 @@
-# terraform-aws-acm-self-signed
+# 📦 AWS ACM Self-Signed Certificate Terraform Module
+
+This Terraform module simplifies generating a self-signed TLS certificate and seamlessly importing it into AWS Certificate Manager (ACM). It is specifically tailored for development, testing, staging, or internal web applications where purchasing a publicly trusted wildcard or SAN TLS certificate isn't strictly necessary.
+
+## Example Usage
+
+```hcl
+module "acm_self_signed_cert" {
+  source = "./modulos/terraform-aws-acm-self-signed" # update source to match your environment 
+
+  # Required
+  common_name = "internal.app.local"
+
+  # Optional but recommended
+  organization          = "My Org Internal"
+  validity_period_hours = 8760 # 1 year
+
+  name_prefix = "dev"
+  environment = "development"
+  
+  common_tags = {
+    Project   = "InternalApp"
+    ManagedBy = "Terraform"
+  }
+}
+```
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
