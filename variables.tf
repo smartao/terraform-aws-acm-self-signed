@@ -28,14 +28,17 @@ variable "validity_period_hours" {
 variable "name_prefix" {
   description = "Prefix for naming resources"
   type        = string
+  default     = ""
 }
 
 variable "environment" {
   description = "Environment tag for resources"
   type        = string
+  default     = ""
 }
 
 variable "common_tags" {
   description = "Common tags to be applied to all resources"
   type        = map(string)
+  default     = {}
 }
