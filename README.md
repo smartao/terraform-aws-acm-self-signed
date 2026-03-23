@@ -1,3 +1,5 @@
+![license](https://img.shields.io/badge/License-MIT-orange?style=flat-square)
+
 # 📦 terraform-aws-acm-self-signed
 
 Terraform module to generate a self-signed TLS certificate and import it into AWS Certificate Manager (ACM).
