@@ -4,20 +4,37 @@
 
 Terraform module to generate a self-signed TLS certificate and import it into AWS Certificate Manager (ACM).
 
-This module simplifies the creation of a private key, a self-signed certificate, and its subsequent import into ACM. It is ideal for internal services, development environments, or any scenario where a publicly trusted certificate is not required.
+This module creates a 2048-bit RSA private key, generates a self-signed TLS certificate, and imports it into AWS Certificate Manager (ACM). It is suitable for internal services, development environments, labs, or any scenario where a publicly trusted certificate is not required.
 
 ## ⚙️ What This Module Does
 
 - Generates a 2048-bit RSA private key.
-- Creates a self-signed TLS certificate with customizable Common Name and Organization.
+- Creates a self-signed TLS certificate with configurable Common Name and Organization.
 - Imports the certificate and private key into AWS ACM.
 - Supports configurable validity periods.
 - Allows tagging of the created ACM certificate.
 
+## 🚧 Current Scope
+
+This module currently supports a simple self-signed server certificate with:
+
+- `common_name`
+- `organization`
+- `validity_period_hours`
+- fixed key algorithm: RSA 2048
+- fixed certificate uses: `key_encipherment`, `digital_signature`, and `server_auth`
+
+It does not currently support:
+
+- Subject Alternative Names (SANs)
+- custom key sizes or algorithms
+- custom `allowed_uses`
+- CA chains or intermediate certificates
+
 ## ⚠️ Important Notes
 
 - **Not for Public Production:** Self-signed certificates are not trusted by browsers by default. They are intended for internal use, development, or testing.
-- **Security:** The private key is stored in the Terraform state. Ensure your state file is stored securely (e.g., encrypted S3 bucket).
+- **State Exposure:** The private key and certificate PEM are stored in the Terraform state because they are used to generate and import the certificate. Protect your state carefully, ideally with encrypted remote state and restricted access.
 - **Manual Trust:** To avoid browser warnings, you may need to manually add this certificate to your system's or browser's trusted root store.
 
 ## 📑 Prerequisites
@@ -34,11 +51,11 @@ Before using this module, ensure you have:
 module "acm_self_signed" {
   source = "sergeimatos/acm-self-signed/aws"
 
-  common_name = "api.internal.example.com"
-  organization = "My Company"
-  
-  environment = "dev"
-  name_prefix = "myapp"
+  common_name           = "api.internal.example.com"
+  organization          = "My Company"
+  validity_period_hours = 8760
+  environment           = "dev"
+  name_prefix           = "myapp"
 }
 ```
 
@@ -52,8 +69,8 @@ terraform apply
 
 ## 🔐 Security Guidance
 
-- **Sensitive Outputs:** This module exports the private key and certificate PEM as sensitive outputs. Handle them with care.
-- **State Protection:** Use remote state with encryption and restricted access to prevent unauthorized exposure of the private key.
+- **Sensitive Outputs:** This module exports the private key and certificate PEM as sensitive outputs. Terraform will still keep these values in state.
+- **State Protection:** Use remote state with encryption and restricted access to reduce the risk of unauthorized access to the private key and certificate material.
 - **Restricted Use:** Limit the use of self-signed certificates to environments where end-user trust is managed or not required.
 
 ## 📁 Typical Use Case
@@ -71,7 +88,7 @@ Private EC2 / Containers
 ## 🧩 Example
 
 - [Simple example](examples/simple)
-- The `examples/simple` directory demonstrates basic usage with a local provider setup.
+- The `examples/simple` directory demonstrates basic usage with an AWS provider configuration.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
